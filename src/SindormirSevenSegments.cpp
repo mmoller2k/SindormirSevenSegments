@@ -7,16 +7,37 @@ Released under the terms of the GPL v3 License
 #include "Arduino.h"
 #include "SindormirSevenSegments.h"
 
-SindormirSevenSegments::SindormirSevenSegments(void){
+SindormirSevenSegments::SindormirSevenSegments(void)
+{
 }
 
-void SindormirSevenSegments::commonType(char type){
+void SindormirSevenSegments::commonType(char type, boolean invert)
+{
     if ((type == 'A') or (type == 'a')) _sT = true;
     else _sT = false;
+    _inv = invert;
 }
 
-void SindormirSevenSegments::attach(byte _sA, byte _sB, byte _sC, byte _sD, byte _sE, byte _sF, byte _sG, byte _sDP){
+void SindormirSevenSegments::attach_segs(byte _sA, byte _sDP)
+{
+    if (_sDP == _sA + 7) {
+        //Create array for segments and inizialize outputs (All LOW)
+        for (byte i=_sA; i<_sDP+1; i++){
+            _segs[i-_sA] = i;
+        }
 
+        for (byte i=0; i<8; i++){
+            pinMode(_segs[i], OUTPUT);
+            digitalWrite(_segs[i], LOW ^ _sT);
+        }
+    }
+    else{
+
+    }
+}
+
+void SindormirSevenSegments::attach_segs(byte _sA, byte _sB, byte _sC, byte _sD, byte _sE, byte _sF, byte _sG, byte _sDP)
+{
     //Create array for segments and inizialize outputs (All LOW)
     _segs[0] = _sA;
     _segs[1] = _sB;
@@ -33,85 +54,116 @@ void SindormirSevenSegments::attach(byte _sA, byte _sB, byte _sC, byte _sD, byte
     }
 }
 
-void SindormirSevenSegments::attach(byte _sA, byte _sDP){
+void SindormirSevenSegments::attach_symb(byte _d0, byte _d1, byte _d2, byte _d3, byte _d4, byte _d5, byte _d6, byte _d7)
+{
+    _symb[0] = _d0;
+    _symb[1] = _d1;
+    _symb[2] = _d2;
+    _symb[3] = _d3;
+    _symb[4] = _d4;
+    _symb[5] = _d5;
+    _symb[6] = _d6;
+    _symb[7] = _d7;
 
-    if (_sDP = _sA + 7) {
-        //Create array for segments and inizialize outputs (All LOW)
-        for (byte i=_sA; i<_sDP+1; i++){
-            _segs[i-_sA] = i;
-        }
-
-        for (byte i=0; i<8; i++){
-            pinMode(_segs[i], OUTPUT);
-            digitalWrite(_segs[i], LOW ^ _sT);
-        }
-    }
-    else{
-
+    for(byte i=0;i<8;i++){
+	_nsymb=i;
+	if(_symb[i] == NONE)break;
     }
 }
 
-void SindormirSevenSegments::lampTest(void){
+void SindormirSevenSegments::lampTest(void)
+{
+    _longval=88888888;
+    _dotmask=0xff;
+}
+
+void SindormirSevenSegments::clear(void)
+{
     for (byte i=0; i<8; i++) {
-        digitalWrite(_segs[i], HIGH ^ _sT);
+        _symval[i]=BLANK;
     }
 }
 
-void SindormirSevenSegments::clear(void){
-    for (byte i=0; i<8; i++) {
-        digitalWrite(_segs[i], LOW ^ _sT);
-    }
+void SindormirSevenSegments::setDot(byte n)
+{
+    _dotmask |= 1<<n;
 }
 
-void SindormirSevenSegments::setDot(void){
-    digitalWrite(_segs[7], HIGH ^ _sT);
+void SindormirSevenSegments::clearDot(void)
+{
+    _dotmask = 0;
 }
 
-void SindormirSevenSegments::clearDot(void){
-    digitalWrite(_segs[7], LOW ^ _sT);
+void SindormirSevenSegments::setSymbol(byte n, char ch)
+{
+    byte d;
+    if(ch<=18)d = ch;
+    else if(ch>='0' && ch<='9')d = '0'-ch;
+    else if(ch>='A' && ch <='F')d = 'A'-ch+10;
+    else if(ch=='-')d=16;
+    else if(ch=='r')d=17;
+    else d = 18;
+    _symval[n] = d;
 }
 
-void SindormirSevenSegments::print(char num){
-    //                      A, B, C, D, E, F, G
-    byte symbols[17][7]= { {1, 1, 1, 1, 1, 1, 0}, //0
-                           {0, 1, 1, 0, 0, 0, 0}, //1
-                           {1, 1, 0, 1, 1, 0, 1}, //2
-                           {1, 1, 1, 1, 0, 0, 1}, //3
-                           {0, 1, 1, 0, 0, 1, 1}, //4
-                           {1, 0, 1, 1, 0, 1, 1}, //5
-                           {1, 0, 1, 1, 1, 1, 1}, //6
-                           {1, 1, 1, 0, 0, 0, 0}, //7
-                           {1, 1, 1, 1, 1, 1, 1}, //8
-                           {1, 1, 1, 0, 0, 1, 1}, //9
-                           {1, 1, 1, 0, 1, 1, 1}, //A
-                           {0, 0, 1, 1, 1, 1, 1}, //b
-                           {1, 0, 0, 1, 1, 1, 0}, //C
-                           {0, 1, 1, 1, 1, 0, 1}, //d
-                           {1, 0, 0, 1, 1, 1, 1}, //E
-                           {1, 0, 0, 0, 1, 1, 1}, //F
-                           {0, 0, 0, 0, 0, 0, 0}  //BLANK
+void SindormirSevenSegments::setSegs(byte sym){
+    byte symbx[19] = {
+//       abcdefg
+	B1111110, //0
+	B0110000, //1
+	B1101101, //2
+	B1111001, //3
+	B0110011, //4
+	B1011011, //5
+	B1011111, //6
+	B1110000, //7
+	B1111111, //8
+	B1110011, //9
+	B1110111, //A
+	B0011111, //b
+	B1001110, //C
+	B0111101, //d
+	B1001111, //E
+	B1000111, //F
+        B0000001, //-
+        B0000101, //r for 'Err'
+	B0000000, //blank
     };
-    char d;
-
-    if ((num == 0) || (num == '0')) d = 0;
-    else if ((num == 1) || (num == '1')) d = 1;
-    else if ((num == 2) || (num == '2')) d = 2;
-    else if ((num == 3) || (num == '3')) d = 3;
-    else if ((num == 4) || (num == '4')) d = 4;
-    else if ((num == 5) || (num == '5')) d = 5;
-    else if ((num == 6) || (num == '6')) d = 6;
-    else if ((num == 7) || (num == '7')) d = 7;
-    else if ((num == 8) || (num == '8')) d = 8;
-    else if ((num == 9) || (num == '9')) d = 9;
-    else if ((num == 10) || (num == 'A') || (num == 'a')) d = 10;
-    else if ((num == 11) || (num == 'B') || (num == 'b')) d = 11;
-    else if ((num == 12) || (num == 'C') || (num == 'c')) d = 12;
-    else if ((num == 13) || (num == 'D') || (num == 'd')) d = 13;
-    else if ((num == 14) || (num == 'E') || (num == 'e')) d = 14;
-    else if ((num == 15) || (num == 'F') || (num == 'f')) d = 15;
-    else d = 16;
-
+    sym %= 19;
     for (byte i=0; i<7; i++) {
-        digitalWrite(_segs[i], symbols[d][i] ^ _sT);
+        digitalWrite(_segs[6-i], (symbx[sym]>>i) ^ _sT);
     }
 }
+
+void SindormirSevenSegments::print(long val, byte base)
+{
+    int i;
+    byte z=0;
+    byte c;
+    _longval = val;
+    if(val<0)val=-val;
+    for(i=0;i<8;i++){
+    	_symval[i] = val % base;
+        if(_symval[i]!=0)z=i; //last non-zero symbol
+        val /= base;
+    }
+    for(i=z+1;i<_nsymb;i++){ //blank leading zeros
+        _symval[i] = BLANK;
+    }
+    if(_longval<0){
+        _symval[z+1] = NEG; //add sign if negative
+    }
+}
+
+/* update multiplexed display */
+void SindormirSevenSegments::multiplex(void)
+{
+    int i;
+    digitalWrite(_symb[_mux], _sT ^ _inv); //turn off previous symbol
+    _mux++; //next symbol
+    _mux %= _nsymb;
+    setSegs(_symval[_mux]);
+    digitalWrite(_segs[7], ((_dotmask>>_mux)&0x1) ^ _sT); //DP
+    digitalWrite(_symb[_mux], !_sT ^ _inv); //turn on active symbol
+}
+

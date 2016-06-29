@@ -1,6 +1,9 @@
 # SindormirSevenSegments
 Simple Seven Segments library for Arduino
 
+# Update
+Modified original library to multiplex up to 8 digits
+
 ## Declaración de objeto ##
 
 Antes de `setup()`:
