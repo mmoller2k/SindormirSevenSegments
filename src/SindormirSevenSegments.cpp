@@ -174,12 +174,12 @@ void SindormirSevenSegments::multiplex(void)
     digitalWrite(_symb[_mux], !_sT ^ _inv); //turn on active symbol
 }
 
-void SindormirSevenSegments::delayms(unsigned long ms)
+void SindormirSevenSegments::delay(unsigned long ms)
 {
   unsigned long now = millis();
   while(millis()-now<ms){
     multiplex();
-    delay(1);
+    ::delay(1);
   }
 }
 

@@ -41,7 +41,7 @@ class SindormirSevenSegments {
         void setSegs(byte sym);
         void print(long n, byte base);
         void print(long n){print(n,10);}
-        void delayms(unsigned long ms);
+        void delay(unsigned long ms);
 
     private:
         byte _nsymb;
