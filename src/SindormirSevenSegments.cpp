@@ -75,7 +75,9 @@ void SindormirSevenSegments::attach_symb(byte _d0, byte _d1, byte _d2, byte _d3,
 
 void SindormirSevenSegments::lampTest(void)
 {
-    _longval=88888888;
+    for (byte i=0; i<8; i++) {
+        _symval[i]=8;
+    }
     _dotmask=0xff;
 }
 
@@ -84,6 +86,7 @@ void SindormirSevenSegments::clear(void)
     for (byte i=0; i<8; i++) {
         _symval[i]=BLANK;
     }
+    _dotmask=0;
 }
 
 void SindormirSevenSegments::setDot(byte n)
@@ -141,9 +144,11 @@ void SindormirSevenSegments::print(long val, byte base)
 {
     int i;
     byte z=0;
-    byte c;
-    _longval = val;
-    if(val<0)val=-val;
+    byte c,sign=1;
+    if(val<0){
+      val=-val;
+      sign=-1;
+    }
     for(i=0;i<8;i++){
     	_symval[i] = val % base;
         if(_symval[i]!=0)z=i; //last non-zero symbol
@@ -152,7 +157,7 @@ void SindormirSevenSegments::print(long val, byte base)
     for(i=z+1;i<_nsymb;i++){ //blank leading zeros
         _symval[i] = BLANK;
     }
-    if(_longval<0){
+    if(sign<0){
         _symval[z+1] = NEG; //add sign if negative
     }
 }

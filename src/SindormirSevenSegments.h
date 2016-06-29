@@ -53,7 +53,6 @@ class SindormirSevenSegments {
 
 	boolean _sT;
         boolean _inv;
-	long _longval;
 };
 
 #endif
