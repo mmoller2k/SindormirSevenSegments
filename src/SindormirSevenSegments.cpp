@@ -68,6 +68,8 @@ void SindormirSevenSegments::attach_symb(byte _d0, byte _d1, byte _d2, byte _d3,
     for(byte i=0;i<8;i++){
 	_nsymb=i;
 	if(_symb[i] == NONE)break;
+        pinMode(_symb[i], OUTPUT);
+        digitalWrite(_segs[i], _inv ^ _sT);
     }
 }
 
