@@ -85,6 +85,9 @@ void SindormirSevenSegments::clear(void)
 {
     for (byte i=0; i<8; i++) {
         _symval[i]=BLANK;
+	if(_symb[i]!=NONE){
+		digitalWrite(_symb[i], !_sT ^ _inv); //turn off immediately
+	}
     }
     _dotmask=0;
 }
@@ -166,12 +169,12 @@ void SindormirSevenSegments::print(long val, byte base)
 void SindormirSevenSegments::multiplex(void)
 {
     int i;
-    digitalWrite(_symb[_mux], _sT ^ _inv); //turn off previous symbol
+    digitalWrite(_symb[_mux], !_sT ^ _inv); //turn off previous symbol
     _mux++; //next symbol
     _mux %= _nsymb;
     setSegs(_symval[_mux]);
     digitalWrite(_segs[7], ((_dotmask>>_mux)&0x1) ^ _sT); //DP
-    digitalWrite(_symb[_mux], !_sT ^ _inv); //turn on active symbol
+    digitalWrite(_symb[_mux], _sT ^ _inv); //turn on active symbol
 }
 
 void SindormirSevenSegments::delay(unsigned long ms)
