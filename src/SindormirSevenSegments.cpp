@@ -115,7 +115,7 @@ void SindormirSevenSegments::setSymbol(byte n, char ch)
 }
 
 void SindormirSevenSegments::setSegs(byte sym){
-    byte symbx[19] = {
+    const byte symbx[19] = {
 //       abcdefg
 	B1111110, //0
 	B0110000, //1
@@ -137,9 +137,10 @@ void SindormirSevenSegments::setSegs(byte sym){
         B0000101, //r for 'Err'
 	B0000000, //blank
     };
-    sym %= 19;
-    for (byte i=0; i<7; i++) {
-        digitalWrite(_segs[6-i], (symbx[sym]>>i) ^ _sT);
+    byte s = symbx[sym%19];
+    for (byte i=6; i>=0; i--) {
+        digitalWrite(_segs[i], (1&s) ^ _sT);
+        s>>=1;
     }
 }
 
