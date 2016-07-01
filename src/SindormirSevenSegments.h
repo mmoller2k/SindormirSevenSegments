@@ -45,7 +45,6 @@ class SindormirSevenSegments {
 
     private:
         byte _nsymb;
-	byte _mux;
         byte _segs[8];
         byte _symb[8];
         byte _symval[8];

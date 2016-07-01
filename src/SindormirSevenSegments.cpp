@@ -107,7 +107,7 @@ void SindormirSevenSegments::setSymbol(byte n, char ch)
     byte d;
     if(ch<=18)d = ch;
     else if(ch>='0' && ch<='9')d = '0'-ch;
-    else if(ch>='A' && ch <='F')d = 'A'-ch+10;
+    else if(ch>='A' && ch <='F')d = ch-'A'+10;
     else if(ch=='-')d=16;
     else if(ch=='r')d=17;
     else d = 18;
@@ -137,10 +137,10 @@ void SindormirSevenSegments::setSegs(byte sym){
         B0000101, //r for 'Err'
 	B0000000, //blank
     };
-    byte s = symbx[sym%19];
-    for (byte i=6; i>=0; i--) {
-        digitalWrite(_segs[i], (1&s) ^ _sT);
-        s>>=1;
+    byte i, s = symbx[sym%19];
+    for (i=0; i<7; i++) {
+        digitalWrite(_segs[6-i], (s&0x1)^_sT);
+        s >>= 1;
     }
 }
 
@@ -170,12 +170,13 @@ void SindormirSevenSegments::print(long val, byte base)
 void SindormirSevenSegments::multiplex(void)
 {
     int i;
-    digitalWrite(_symb[_mux], !_sT ^ _inv); //turn off previous symbol
-    _mux++; //next symbol
-    _mux %= _nsymb;
-    setSegs(_symval[_mux]);
-    digitalWrite(_segs[7], ((_dotmask>>_mux)&0x1) ^ _sT); //DP
-    digitalWrite(_symb[_mux], _sT ^ _inv); //turn on active symbol
+    static int mux=0;
+    digitalWrite(_symb[mux], !_sT ^ _inv); //turn off previous symbol
+    mux++; //next symbol
+    mux %= _nsymb;
+    setSegs(_symval[mux]);
+    digitalWrite(_segs[7], ((_dotmask>>mux)&0x1) ^ _sT); //DP
+    digitalWrite(_symb[mux], _sT ^ _inv); //turn on active symbol
 }
 
 void SindormirSevenSegments::delay(unsigned long ms)
