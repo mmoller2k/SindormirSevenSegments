@@ -69,7 +69,7 @@ void SindormirSevenSegments::attach_symb(byte _d0, byte _d1, byte _d2, byte _d3,
 	_nsymb=i;
 	if(_symb[i] == NONE)break;
         pinMode(_symb[i], OUTPUT);
-        digitalWrite(_segs[i], _inv ^ _sT);
+        digitalWrite(_segs[i], !_sT ^ _inv);
     }
 }
 
@@ -106,7 +106,7 @@ void SindormirSevenSegments::setSymbol(byte n, char ch)
 {
     byte d;
     if(ch<=18)d = ch;
-    else if(ch>='0' && ch<='9')d = '0'-ch;
+    else if(ch>='0' && ch<='9')d = ch-'0';
     else if(ch>='A' && ch <='F')d = ch-'A'+10;
     else if(ch=='-')d=16;
     else if(ch=='r')d=17;
